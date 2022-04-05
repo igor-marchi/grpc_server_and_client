@@ -10,12 +10,6 @@ import (
 	"github.com/igor-marchi/grpc_full_cycle/pb"
 )
 
-// type UserServiceServer interface {
-// 	AddUser(context.Context, *User) (*User, error)
-// 	mustEmbedUnimplementedUserServiceServer()
-//  AddUserVerbose(ctx context.Context, in *User, opts ...grpc.CallOption) (UserService_AddUserVerboseClient, error)
-// }
-
 type UserService struct {
 	pb.UnimplementedUserServiceServer
 }
@@ -96,5 +90,29 @@ func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 		})
 
 		fmt.Println("Adding", req.GetName())
+	}
+}
+
+func (*UserService) AddUserStreamBoth(stream pb.UserService_AddUserStreamBothServer) error {
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			fmt.Println("Finish")
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Error receiving stream from the client: %v", err)
+		}
+
+		err = stream.Send(&pb.UserResultStream{
+			Status: "Added",
+			User:   req,
+		})
+
+		fmt.Printf("Receiving: %v \n", req.GetName())
+
+		if err != nil {
+			log.Fatalf("Error send stream to the client: %v", err)
+		}
 	}
 }
