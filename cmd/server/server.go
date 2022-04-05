@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -9,6 +10,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+// Run server
+// go run cmd/server/server.go
 
 func main() {
 	lis, err := net.Listen("tcp", "localhost:50051")
@@ -19,6 +23,8 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterUserServiceServer(grpcServer, services.NewUserService())
 	reflection.Register(grpcServer)
+
+	fmt.Println("Server run 🔥")
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Could not serve: %v", err)
